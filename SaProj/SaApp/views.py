@@ -6,6 +6,9 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 import datetime
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Create your views here.
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
@@ -22,6 +25,7 @@ def BuildsIndex(request):
         build_dic1 = {}
         build_id_list.append(bu.id)
         build_dic1['name'] = bu.name
+        build_dic1['revision'] = bu.revision
         build_dic1['issues'] = len(bu.issue_set.all())
         build_dic[bu.id] = build_dic1
         #build_list.append(build_dic)
@@ -104,7 +108,7 @@ class UpdateIssue(viewsets.ModelViewSet):
         self.severity = request.POST['severity']
         self.build_name = request.POST['build_name']
         self.build_revision = request.POST['build_revision']
-        self.cons = Issue.objects.filter(file_name__contains = self.file_name, description__contains = self.issue_desc, line= self.line, column = self.column)
+        self.cons = Issue.objects.filter(file_name = self.file_name, description = self.issue_desc, line= self.line, column = self.column)
         if ( len(self.cons) == 0 ):
             """ issue not present in the database to be added
             """
@@ -231,9 +235,12 @@ class IssueStatus(viewsets.ModelViewSet):
         self.line = request.POST['line']
         self.column = request.POST['column']
         self.severity = request.POST['severity']
-        self.cons = Issue.objects.filter(file_name__contains = self.file_name, description__contains = self.issue_desc, line= self.line, column = self.column)
-        if ( len(self.cons) == 0 ):
-            return HttpResponse("Issue doesnot Exists")
+        #return HttpResponse("file _name %s"%(self.file_name))
+        #return HttpResponse( str("line :%d, col:%d"%(int(self.line),int(self.column))))
+        issue_objs = Issue.objects.filter(file_name = str(self.file_name), description = str(self.issue_desc), line= int(self.line), column = int(self.column), severity = int(self.severity))
+        logger.debug(len(issue_objs))
+        if ( len(issue_objs) == 0 ):
+            return HttpResponse("Issue doesnot Exists[ New Issue ]")
         else:
             return HttpResponse("Issue exists")
 
