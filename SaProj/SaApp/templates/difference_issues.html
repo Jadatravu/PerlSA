@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load ttags %}
 <html>
    <head>
       <meta charset="utf-8">
@@ -70,7 +71,7 @@
                         {% for document in i_fixed %}
                         <tr>
                            <td></td>
-                           <td>{{document.file_name}}</td>
+                           <td>{% change_file_path document.file_name %}</td>
                            <td>{{document.description}}</td>
                            <td>{{document.severity}}</td>
                            <td>{{document.line}}</td>
@@ -99,7 +100,7 @@
                         {% for document in i_added %}
                         <tr>
                            <td></td>
-                           <td>{{document.file_name}}</td>
+                           <td>{% change_file_path document.file_name %}</td>
                            <td>{{document.description}}</td>
                            <td>{{document.severity}}</td>
                            <td>{{document.line}}</td>
