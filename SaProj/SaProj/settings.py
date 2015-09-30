@@ -75,13 +75,36 @@ WSGI_APPLICATION = 'SaProj.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+"""
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'perl_sa',
+        'USER' : 'root',
+        'PASSWORD': 'password',
+        'HOST':'',
+        'PORT':'',
+    }
+}
+"""
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'perl_pm_sa',
+        'USER' : 'root',
+        'PASSWORD': 'password',
+        'HOST':'',
+        'PORT':'',
+    }
+}
+"""
 
 
 # Internationalization
@@ -102,3 +125,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file':{
+            'level':'DEBUG',
+            'class':'logging.FileHandler',
+            'filename':'/root/PerlSA/PerlSA/SaProj/logapp.log',
+        },
+    },
+    'loggers': {
+        'SaApp':{
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate':True,
+        },
+    }
+}
+
