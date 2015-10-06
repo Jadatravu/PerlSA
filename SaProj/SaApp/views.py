@@ -9,6 +9,8 @@ import datetime
 import urllib2
 from unidiff import PatchSet
 
+import pysvn
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -17,6 +19,17 @@ from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from SaApp.serializers import RestAppSerializer, RestBuildAppSerializer
 from rest_framework import permissions
+
+def ssl_server_trust_prompt(trust_dict):
+    return True, trust_dict['failures'], True
+    #return retcode, accepted_failures, save
+
+def login(*args):
+    #name = raw_input("Enter your svn login : ")
+    #password = getpass.getpass("Enter your svn password :")
+    #return True, name, password, False
+    return True, 'sjanardhana', 'Polycom@123', False
+
 
 def BuildsIndex(request):
     res_str = ''
@@ -233,10 +246,27 @@ def BuildsIssueIndex3(request):
         build2_objs = Build.objects.filter(name = build2)
         if len(build2_objs) == 0:
             return
+        build1_revision = build1_objs[0].revision
+        build2_revision = build2_objs[0].revision
+        client = pysvn.Client()
+        client.callback_get_login = login
+        client.callback_ssl_server_trust_prompt = ssl_server_trust_prompt
+        work_path = '/root/PerlSA/02Sep15/lib'
+        tmp_path="/tmp/tmp123"
+        head = pysvn.Revision(pysvn.opt_revision_kind.number, int(build1_revision))
+        end = pysvn.Revision(pysvn.opt_revision_kind.number, int(build2_revision))
+        diff_text = client.diff(tmp_path = tmp_path,url_or_path = work_path, revision1=head, revision2=end,recurse=True)
+        svn_diff_file = str("/tmp/svn_diff_files/ta_root3_lib_") + str(build1_revision) + str("_") + str(build2_revision) + str(".diff")
+        #with open("/tmp/1oct15.diff","w+") as f:
+        f = open(svn_diff_file,"w+") 
+        f.write(diff_text) 
+        f.close()
         issues_build1 = build1_objs[0].issue_set.all()
         issues_build2 = build2_objs[0].issue_set.all()
         new_issue_list = []
-        diff = urllib2.urlopen("file:///tmp/ta_root3_lib_47593_47715.diff")
+        #diff = urllib2.urlopen("file:///tmp/ta_root3_lib_47593_47715.diff")
+        svn_diff_file_url = str("file://") + svn_diff_file
+        diff = urllib2.urlopen(svn_diff_file_url)
         encoding = diff.headers.getparam('charset')
         patch = PatchSet(diff,encoding=encoding)
         modified_files_list = []
